@@ -2,6 +2,7 @@
 
 Monster::Monster()
 {
+    radio = 0;
     partCount = 0;
     buffIdx = 0;
 }
@@ -110,10 +111,18 @@ bool Monster::readMessage(Message &msg)
     }
 #endif
 #if defined (RASPBERRY)
+    if (radio == 0)
+    {
+        for(int i=0; i<MSG_SIZE; i++)
+        msg.data[i] = 0xFF;
+    }
+    else
+    {
     while(radio->available())
     {
         radio->read((void*)msg.data,MSG_SIZE);
         return true;
+    }
     }
 #endif
     return false;
