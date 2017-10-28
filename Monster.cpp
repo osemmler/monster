@@ -41,12 +41,26 @@ void Monster::setup()
 
 #if defined(ARDUINO) || defined(RASPBERRY)
     // start wireless communication
+#if defined(ARDUINO)
     radio = new RF24(9,10);
+#endif
+#if defined(RASPBERRY)
+    radio = new RF24(17,0);
+#endif
     radio->begin();
     radio->setPALevel(RF24_PA_MAX);
     radio->setChannel(0x76);
+    radio->setPayloadSize(MSG_SIZE);
+#if defined(ARDUINO)
     radio->openWritingPipe(0xF0F0F0F0E1LL);
+#endif
+#if defined(RASPBERRY)
+    radio->openReadingPipe(1,0xF0F0F0F0E1);
+    radio->startListening();
+#endif
     radio->enableDynamicPayloads();
+    radio->setAutoAck(true);
+    radio->enableAckPayload();
     radio->powerUp();
     //radio->printDetails();
 #endif
@@ -79,7 +93,7 @@ void Monster::readAllProps()
 
 bool Monster::readMessage(Message &msg)
 {
-#ifdef DESKTOP
+#if defined (DESKTOP)
     uint8_t c;
     while (read(tty_fd,&c,1)>0)
     {
@@ -93,6 +107,13 @@ bool Monster::readMessage(Message &msg)
             memcpy(msg.data, buff, MSG_SIZE);
             return true;
         }
+    }
+#endif
+#if defined (RASPBERRY)
+    while(radio->available())
+    {
+        radio->read((void*)msg.data,MSG_SIZE);
+        return true;
     }
 #endif
     return false;
