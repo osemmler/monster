@@ -70,8 +70,8 @@ void Monster::readAllProps()
             // send message
 #if defined (ARDUINO)
             Serial.write(msg.data,MSG_SIZE);
-            //for(int i=0; i<MSG_SIZE; i++) Serial.print(msg.data[i],HEX);
             Serial.println();
+            radio->write((void*)msg.data,MSG_SIZE);
 #endif
         }
     }
