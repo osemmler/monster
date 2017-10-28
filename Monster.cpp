@@ -2,7 +2,9 @@
 
 Monster::Monster()
 {
+#if defined(ARDUINO) || defined(RASPBERRY)
     radio = 0;
+#endif
     partCount = 0;
     buffIdx = 0;
 }
@@ -40,30 +42,27 @@ void Monster::setup()
     tcsetattr(tty_fd,TCSANOW,&tio);
 #endif
 
-#if defined(ARDUINO) || defined(RASPBERRY)
-    // start wireless communication
 #if defined(ARDUINO)
     radio = new RF24(9,10);
-#endif
-#if defined(RASPBERRY)
-    radio = new RF24(17,0);
-#endif
     radio->begin();
     radio->setPALevel(RF24_PA_MAX);
     radio->setChannel(0x76);
-    radio->setPayloadSize(MSG_SIZE);
-#if defined(ARDUINO)
     radio->openWritingPipe(0xF0F0F0F0E1LL);
+    radio->enableDynamicPayloads();
+    radio->powerUp();
 #endif
+
 #if defined(RASPBERRY)
+    radio = RF24(17,0);
+    radio->begin();
+    radio->setPayloadSize(MSG_SIZE);
+    radio->setPALevel(RF24_PA_MAX);
+    radio->setChannel(0x76);
+    radio->setAutoAck(true);
+    radio->enableDynamicPayloads();
+    radio->enableAckPayload();
     radio->openReadingPipe(1,0xF0F0F0F0E1);
     radio->startListening();
-#endif
-    radio->enableDynamicPayloads();
-    radio->setAutoAck(true);
-    radio->enableAckPayload();
-    radio->powerUp();
-    //radio->printDetails();
 #endif
 }
 
@@ -111,18 +110,10 @@ bool Monster::readMessage(Message &msg)
     }
 #endif
 #if defined (RASPBERRY)
-    if (radio == 0)
-    {
-        for(int i=0; i<MSG_SIZE; i++)
-        msg.data[i] = 0xFF;
-    }
-    else
-    {
     while(radio->available())
     {
         radio->read((void*)msg.data,MSG_SIZE);
         return true;
-    }
     }
 #endif
     return false;
