@@ -92,6 +92,6 @@ void Part_DHT::updateProps()
 
   float hum = dht->readHumidity();
   if (isnan(hum)) hum = 0;
-  *(float*)(propArray[0]->value) = hum;
+  *(float*)(propArray[1]->value) = hum;
 }
 #endif
