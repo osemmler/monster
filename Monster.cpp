@@ -53,7 +53,7 @@ void Monster::setup()
 #endif
 
 #if defined(RASPBERRY)
-    radio = RF24(17,0);
+    radio = new RF24(17,0);
     radio->begin();
     radio->setPayloadSize(MSG_SIZE);
     radio->setPALevel(RF24_PA_MAX);
