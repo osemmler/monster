@@ -59,4 +59,25 @@ private:
 };
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+#if defined (ARDUINO)
+#include <OneWire.h>
+#include <DallasTemperature.h>
+class Part_Temp_DS18B20 : public Part
+{
+public:
+  Part_Temp_DS18B20(uint8_t pin);
+  ~Part_Temp_DS18B20();
+
+  virtual void updateProps();
+
+private:
+  OneWire * oneWire;
+  DallasTemperature * sensor;
+};
+#endif
+
 #endif //PART_H

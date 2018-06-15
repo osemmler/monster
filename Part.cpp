@@ -95,3 +95,39 @@ void Part_DHT::updateProps()
   *(float*)(propArray[1]->value) = hum;
 }
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+#if defined (ARDUINO)
+Part_Temp_DS18B20::Part_Temp_DS18B20(uint8_t pin)
+{
+  propCount = 1;
+  propArray = new Prop*[propCount];
+
+  propArray[0] = propFactory<float>(Prop::TEMP, Prop::READ, 0);
+
+  oneWire = new OneWire(pin);
+  sensor = new DallasTemperature(oneWire);
+  sensor->begin();
+}
+
+Part_Temp_DS18B20::~Part_Temp_DS18B20()
+{
+  delete sensor;
+  delete oneWire;
+}
+
+void Part_Temp_DS18B20::updateProps()
+{
+  sensor->requestTemperatures();
+  float temp = sensor->getTempCByIndex(0);
+
+  Serial.print("temp=");
+  Serial.println(temp);
+
+  if (isnan(temp)) temp = 0;
+  *(float*)(propArray[0]->value) = temp;
+}
+#endif
